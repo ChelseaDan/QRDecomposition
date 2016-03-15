@@ -1,7 +1,9 @@
 import numpy as np
+import sys
 
-height = 3
-width = 3
+height = 3 if (len(sys.argv) <= 1) else int(sys.argv[1])
+width = height
+EPSILON = 0.0001
 
 def initialise_random_symmetric():
   matrix = np.asarray([[np.random.randint(1,10) if i >= j else 0 for i in range(0,width)] 
@@ -10,12 +12,12 @@ def initialise_random_symmetric():
   return np.add(matrix, matrixT, matrix)
 
 def qr_decomposition(matrix):
-  q = [[0 for x in range(height)] for x in range(width)]
-  r = [[0 for x in range(height)] for x in range(width)]
+  q = np.zeros((width, height))
+  r = np.zeros((width, height))
   for i in range(0,width):
     q[i] = matrix[i]
     for j in range(0,i):
-      qj = np.asarray(q[j]).T
+      qj = q[j].T
       ui = matrix[i]
       r[j][i] = np.dot(qj,ui)
       q[i] = q[i] - np.dot(r[j][i], qj)
@@ -25,7 +27,8 @@ def qr_decomposition(matrix):
 
 def qr_iterations(q, r):
   eigenvectors = q
-  for i in range(0,10):
+  ak = np.dot(r,q)
+  while(abs(abs(ak.sum()) - np.matrix.trace(ak)) > EPSILON):
     ak = np.dot(r,q)
     q,r = qr_decomposition(ak)
     eigenvectors = np.dot(eigenvectors, q)
